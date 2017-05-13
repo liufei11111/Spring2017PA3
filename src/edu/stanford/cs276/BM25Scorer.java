@@ -215,7 +215,7 @@ public class BM25Scorer extends AScorer {
       }
       score = score + (termScore / (k1 + termScore) * idfsTerm) * tfQuery.get(term);
     }
-    return score  + pagerankScores.get(d);
+    return score + pageRankLambda * pagerankScores.get(d);
   }
 
   /**
