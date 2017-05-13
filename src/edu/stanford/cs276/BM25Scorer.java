@@ -213,9 +213,9 @@ public class BM25Scorer extends AScorer {
       if (idfs.containsKey(term)) {
         idfsTerm = idfs.get(term);
       }
-      score = score + (termScore / (k1 + termScore) * idfsTerm + pagerankScores.get(d)) * tfQuery.get(term);
+      score = score + (termScore / (k1 + termScore) * idfsTerm) * tfQuery.get(term);
     }
-    return score;
+    return score  + pagerankScores.get(d);
   }
 
   /**
