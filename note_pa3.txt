@@ -7,3 +7,6 @@ time java -Xmx6024m -cp classes edu.stanford.cs276.test.CosinNdcgMain data/pa3.s
 
 time java -Xmx6024m -cp classes edu.stanford.cs276.test.AdditionalConfigTunner
 
+
+git@github.com:liufei11111/Spring2017PA3.git
+http://web.stanford.edu/class/cs276/pa/pa3-data.zip
