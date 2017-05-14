@@ -42,7 +42,8 @@ public class CosinNdcgMain {
    */
   private static Map<Query,List<Pair<Document,Double>>> score(
       Map<Query, Map<String, Document>> queryDict, String scoreType, Map<String, Double> idfs,
-      List<Pair<Pair<Integer, Integer>, Double>> config) {
+      List<Pair<Pair<Integer, Integer>, Double>> config,
+      List<Pair<Pair<Integer, Integer>, Double>> additionalConfig) {
     AScorer scorer = null;
     if (scoreType.equals("baseline")) {
       scorer = new BaselineScorer();
@@ -54,6 +55,7 @@ public class CosinNdcgMain {
       temp.bodyweight = config.get(2).getSecond();
       temp.headerweight = config.get(3).getSecond();
       temp.anchorweight = config.get(4).getSecond();
+      temp.smoothingBodyLength = additionalConfig.get(0).getSecond();
 
     } else if (scoreType.equals("bm25")) {
       scorer = new BM25Scorer(idfs, queryDict);
@@ -224,18 +226,30 @@ public class CosinNdcgMain {
     Map<String,Map<String,Double>> relevScores = test.genRelScore(args[4]);
 ////////////////////////////////// below the tunning code: /////////////////////////////
     // String[] TFTYPES = {"url","title","body","header","anchor"};
+
+//    /* print out ranking result, keep this stdout format in your submission */
+//    printRankedResults(queryRankings);
+//
+//    //print results and save them to file "ranked.txt" (to run with NdcgMain.java)
+//    String outputFilePath = "ranked.txt";
+//    writeRankedResultsToFile(queryRankings,outputFilePath);
+    /////////////////////linear constraint init values///////////////
     List<Pair<String,Pair<Double,Double>>> parameters = new ArrayList<>();
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[0],new Pair(0.0,1.0)));// url
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[1],new Pair(0.0,1.0)));// title
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[2],new Pair(0.0,1.0)));// body
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[3],new Pair(0.0,1.0)));// header
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[4],new Pair(0.0,1.0)));// anchor
-//    List<Pair<String,Pair<Double,Double>>> parameters = new ArrayList<>();
-//    parameters.add(new Pair<>("Param1",new Pair<>(0.0,1.0)));
-//    parameters.add(new Pair<>("Param2",new Pair<>(0.0,0.5)));
     Double[] arrays = {0.1,0.1,0.1,0.1,0.1};
-    List<Double> initialValues = Arrays.asList(arrays);
-    BaseLineConfigTunner tunner = new BaseLineConfigTunner(parameters,initialValues,5);
+    List<Double> initialValues = new ArrayList<>(Arrays.asList(arrays));
+
+
+    ///////////////////// additional init values///////////////
+    List<Pair<String,Pair<Double,Double>>> additionalParams = new ArrayList<>();
+    additionalParams.add(new Pair("SmoothingBodyLength",new Pair(0.0,1000.0)));
+    Double[] additionalArrays = {500.0};
+    List<Double> additionalInitialValues = Arrays.asList(additionalArrays);
+    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,1);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     double bestScore = -Double.MAX_VALUE;
     while(tunner.isFlippable()){
@@ -256,8 +270,16 @@ public class CosinNdcgMain {
         System.out.println("---Generating Config:---");
         tunner.printConfig(config);
 
-        Map<Query,List<Pair<Document,Double>>> queryRankings = score(queryDict, taskOption, idfs, config);
-        double ndcgScore = test.runOneConfigure(relevScores,queryRankings);
+
+
+    /* score documents for queries */
+        Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> localResult = test.linearConstrainTunner(parameters, initialValues, queryDict, taskOption, idfs, test, relevScores, config);
+        // update parameters and initial values for linear constraint problem
+        updateParameters(localResult, parameters);
+        updateInitValues(localResult, initialValues);
+        //
+
+        double ndcgScore = localResult.getSecond();
         System.out.println("ConsinNDcgMain test run for NDCGScore: "+ndcgScore);
         System.out.println("-------------------------");
         tunner.update(oneTuned.getFirst().getFirst(),oneTuned.getFirst().getSecond(),ndcgScore);
@@ -271,18 +293,75 @@ public class CosinNdcgMain {
     System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$");
     tunner.printConfig(bestConfig);
     System.out.println("Best Score: "+bestScore);
-    /* score documents for queries */
-
-//    /* print out ranking result, keep this stdout format in your submission */
-//    printRankedResults(queryRankings);
-//
-//    //print results and save them to file "ranked.txt" (to run with NdcgMain.java)
-//    String outputFilePath = "ranked.txt";
-//    writeRankedResultsToFile(queryRankings,outputFilePath);
 
 
 
+  }
 
+  private static void updateInitValues(
+      Pair<List<Pair<Pair<Integer, Integer>, Double>>, Double> localResult,
+      List<Double> initialValues) {
+    initialValues.clear();
+    for (Pair<Pair<Integer, Integer>, Double> pair:localResult.getFirst()){
+      initialValues.add(pair.getSecond());
+    }
+  }
+
+  private static void updateParameters(
+      Pair<List<Pair<Pair<Integer, Integer>, Double>>, Double> localResult,
+      List<Pair<String, Pair<Double, Double>>> parameters) {
+    List<Pair<Pair<Integer, Integer>, Double>> newParams = localResult.getFirst();
+    for (int i=0;i<parameters.size();++i){
+      Pair<Double,Double> oldPair = parameters.get(i).getSecond();
+      double oldRange = oldPair.getSecond()-oldPair.getFirst();
+      double newRange = oldRange/4.0;
+      double newCenter = newParams.get(i).getSecond();
+      double newLower = Math.max(oldPair.getFirst(),newCenter-newRange);
+      double newUpper = Math.min(oldPair.getSecond(),newCenter+newRange);
+      parameters.get(i).setSecond(new Pair<>(newLower,newUpper));
+    }
+  }
+
+  public Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> linearConstrainTunner(List<Pair<String,Pair<Double,Double>>> parameters,
+      List<Double> initialValues, Map<Query,Map<String, Document>> queryDict, String taskOption,
+      Map<String, Double> idfs,CosinNdcgMain test, Map<String,Map<String,Double>> relevScores, List<Pair<Pair<Integer,Integer>, Double>> additionalConfig){
+    BaseLineConfigTunner tunner = new LinearContraintConfigTunner(parameters,initialValues,2);
+    List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
+    double bestScore = -Double.MAX_VALUE;
+    while(tunner.isFlippable()){
+//      System.out.println("==================Generating Config:=====================");
+      while(!tunner.isCompleted()){
+        // i, which -> config value
+        List<Pair<Pair<Integer,Integer>, Double>> config = tunner.getConfig();
+        Pair<Pair<Integer,Integer>, Double> oneTuned = null;
+        for (Pair<Pair<Integer,Integer>, Double> pair : config){
+          if (pair.getFirst().getSecond() < tunner.eachSize && pair.getFirst().getSecond()>=0 ){
+            oneTuned = pair;
+          }
+        }
+        if (oneTuned == null){
+          oneTuned = config.get(config.size()-1);
+        }
+//        System.out.println("Picked pair: "+oneTuned);
+//        System.out.println("---Generating Config:---");
+        tunner.printConfig(config);
+
+        Map<Query,List<Pair<Document,Double>>> queryRankings = score(queryDict, taskOption, idfs, config, additionalConfig);
+        double ndcgScore = test.runOneConfigure(relevScores,queryRankings);
+//        System.out.println("ConsinNDcgMain test run for NDCGScore: "+ndcgScore);
+//        System.out.println("-------------------------");
+        tunner.update(oneTuned.getFirst().getFirst(),oneTuned.getFirst().getSecond(),ndcgScore);
+        if (ndcgScore>bestScore){
+          bestScore = ndcgScore;
+          bestConfig = config;
+        }
+      }
+      tunner.flip();
+    }
+//    System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+    tunner.printConfig(bestConfig);
+//    System.out.println("Best Score: "+bestScore);
+    return new Pair(bestConfig,bestScore);
   }
   private Map<String,Map<String,Double>> genRelScore(String fileName) throws IOException {
     HashMap<String, Map<String, Double>> relevScores = new HashMap<String, Map<String, Double>>();
