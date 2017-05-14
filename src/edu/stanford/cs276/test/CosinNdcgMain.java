@@ -249,7 +249,7 @@ public class CosinNdcgMain {
     additionalParams.add(new Pair("SmoothingBodyLength",new Pair(0.0,1000.0)));
     Double[] additionalArrays = {500.0};
     List<Double> additionalInitialValues = Arrays.asList(additionalArrays);
-    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,1);
+    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,2);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     List<Pair<Pair<Integer,Integer>, Double>> bestLocalConfig = null;
     double bestScore = -Double.MAX_VALUE;
@@ -294,7 +294,7 @@ public class CosinNdcgMain {
     }
     System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$");
     tunner.printConfig(bestConfig);
-    tunner.printConfig(bestLocalConfig);
+
     System.out.println("Best Score: "+bestScore);
 
 
