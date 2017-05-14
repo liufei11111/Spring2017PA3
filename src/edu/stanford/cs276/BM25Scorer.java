@@ -196,7 +196,7 @@ public class BM25Scorer extends AScorer {
    * @param d the Document
    * @return the net score
    */
-  public double getNetScore(Map<String,Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery,Document d, Map<String,Double> idfs) {
+  public double getNetScore(Map<String,Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery,Document d) {
 
     double score = 0.0;
     for (String term : tfQuery.keySet()) {
@@ -287,7 +287,7 @@ public class BM25Scorer extends AScorer {
     // This is only used for grading purposes.
     // You should NOT modify the writeParaValues method.
     writeParaValues("bm25Para.txt");
-    return getNetScore(tfs,q,tfQuery,d, idfs);
+    return getNetScore(tfs,q,tfQuery,d);
   }
   
 }
