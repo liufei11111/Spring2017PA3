@@ -1,2 +1,6 @@
 ./rank.sh data/pa3.signal.dev cosine pa1-data/ true
 time ./rank.sh data/pa3.signal.dev cosine idfs false > output/output_rank.txt
+time ./ndcg.sh output/output_rank.txt data/pa3.rel.dev output/ndcg_output_rank.txt
+
+
+java -Xmx6024m -cp classes edu.stanford.cs276.test.CosinNdcgMain data/pa3.signal.dev cosine idfs false data/pa3.rel.dev
