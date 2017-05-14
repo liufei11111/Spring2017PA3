@@ -1,0 +1,2 @@
+./rank.sh data/pa3.signal.dev cosine pa1-data/ true
+time ./rank.sh data/pa3.signal.dev cosine idfs false > output/output_rank.txt
