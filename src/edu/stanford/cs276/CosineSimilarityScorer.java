@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -27,13 +28,13 @@ public class CosineSimilarityScorer extends AScorer {
    * TODO: You will want to tune the values for
    * the weights for each field.
    */
-  double urlweight = 0.1;
-  double titleweight  = 0.1;
-  double bodyweight = 0.1;
-  double headerweight = 0.1;
-  double anchorweight = 0.1;
-  double smoothingBodyLength = 1.0; 
-  
+  public double urlweight = 0.1;
+  public double titleweight  = 0.1;
+  public double bodyweight = 0.1;
+  public double headerweight = 0.1;
+  public double anchorweight = 0.1;
+  public double smoothingBodyLength = 500.0;
+  //  String[] TFTYPES = {"url","title","body","header","anchor"};
   /**
    * Construct a Cosine Similarity Scorer.
    * @param idfs the map of idf values
@@ -52,13 +53,26 @@ public class CosineSimilarityScorer extends AScorer {
    */
   public double getNetScore(Map<String, Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery, Document d) {
     double score = 0.0;
-    
+
     /*
      * TODO : Your code here
      * See Equation 2 in the handout regarding the net score
      * between a query vector and the term score vectors
      * for a document.
      */
+    Map<String,Double> urlMap = tfs.get(TFTYPES[0]);
+    Map<String,Double> titleMap = tfs.get(TFTYPES[1]);
+    Map<String,Double> bodyMap = tfs.get(TFTYPES[2]);
+    Map<String,Double> headerMap = tfs.get(TFTYPES[3]);
+    Map<String,Double> anchorMap = tfs.get(TFTYPES[4]);
+
+    for (Entry<String, Double> entry : tfQuery.entrySet()){
+      score += urlMap.get(entry.getKey())*entry.getValue()*urlweight;
+      score += titleMap.get(entry.getKey())*entry.getValue()*titleweight;
+      score += bodyMap.get(entry.getKey())*entry.getValue()*bodyweight;
+      score += headerMap.get(entry.getKey())*entry.getValue()*headerweight;
+      score += anchorMap.get(entry.getKey())*entry.getValue()*anchorweight;
+    }
     return score;
   }
   
@@ -74,6 +88,13 @@ public class CosineSimilarityScorer extends AScorer {
      * Note that we should give uniform normalization to all 
      * fields as discussed in the assignment handout.
      */
+   double bodyLengthSmoothed =d.body_length + smoothingBodyLength;
+   for (String type : TFTYPES){
+     Map<String, Double> keyMap = tfs.get(type);
+     for(Entry<String, Double> entry : keyMap.entrySet()){
+       entry.setValue(entry.getValue()/bodyLengthSmoothed);
+     }
+   }
   }
   
   /**

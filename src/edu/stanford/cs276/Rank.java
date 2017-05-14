@@ -69,7 +69,8 @@ public class Rank {
            * Define a custom compare function to help sort urls
            * urls for a query based on scores.
            */
-          return 0;
+            return o2.getSecond().compareTo(o1.getSecond());
+
         }
       });
       

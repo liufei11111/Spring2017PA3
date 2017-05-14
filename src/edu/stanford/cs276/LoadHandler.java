@@ -203,7 +203,7 @@ public class LoadHandler {
       double temp = termDocCount.get(term);
       termDocCount.put(term,logTotalDoc-Math.log(temp+1));
     }
-    
+    termDocCount.put(Config.totalDocumentCountKey,logTotalDoc);
     // Save to file
     try {
       FileOutputStream fos = new FileOutputStream(idfFile);
