@@ -242,7 +242,7 @@ public class BM25NdcgMain {
   public Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> linearConstrainTunner(List<Pair<String,Pair<Double,Double>>> parameters,
       List<Double> initialValues, Map<Query,Map<String, Document>> queryDict, String taskOption,
       Map<String, Double> idfs,BM25NdcgMain test, Map<String,Map<String,Double>> relevScores){
-    AdditionalConfigTunner tunner = new AdditionalConfigTunner(parameters,initialValues,2);
+    AdditionalConfigTunner tunner = new AdditionalConfigTunner(parameters,initialValues,5);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     double bestScore = -Double.MAX_VALUE;
     while(tunner.isFlippable()){
