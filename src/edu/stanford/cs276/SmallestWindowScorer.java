@@ -2,8 +2,11 @@ package edu.stanford.cs276;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+
 
 /**
  * A skeleton for implementing the Smallest Window scorer in Task 3.
@@ -13,8 +16,201 @@ import java.util.Map;
  */
 public class SmallestWindowScorer extends BM25Scorer {
   
+  private double B = 2.0;
+  
   public SmallestWindowScorer(Map<String, Double> idfs, Map<Query,Map<String, Document>> queryDict) {
     super(idfs, queryDict);
+    /*smallestWindow = new HashMap<Query, Map<Document, Double>>();
+    for (Query query : queryDict.keySet()) {
+      
+      Map<String, Document> urls = queryDict.get(query);
+      for (String url : urls.keySet()) {
+        Document doc = urls.get(url);
+        for (String tfType : this.TFTYPES) {
+          int getSmallestFieldWindow()
+        }
+      }
+    }*/
+  }
+  
+  private int getSmallestFieldWindow(Map<String,Double> tfQuery, String s, String reg) {
+    if (s == null) {
+      return Integer.MAX_VALUE;
+    }
+    int needToSatisfy = tfQuery.size();
+    Map<String,Double> sQuery = new HashMap<String, Double>();
+    String[] t = s.split(reg, -1);
+    int sl = 0;
+    for (String k : t) {
+      if (!k.isEmpty()) {
+        sl++;
+      }
+    }
+    int smallestFieldWindow = Integer.MAX_VALUE;
+    int index1 = 0;
+    int index2 = 0;
+    int rindex1 = 0;
+    int rindex2 = 0;
+    while (t[rindex1].isEmpty()) {
+      rindex1++;
+      continue;
+    }
+    while (t[rindex2].isEmpty()) {
+      rindex2++;
+      continue;
+    }
+    int satisfied = 0;
+    while(index2 < sl) {
+      String sIndex1 = t[rindex1];
+      String sIndex2 = t[rindex2];
+      double SOccurence = 0.0;
+      if (sQuery.containsKey(sIndex2)) {
+        SOccurence = sQuery.get(sIndex2);
+        sQuery.put(sIndex2, SOccurence + 1);
+      } else {
+        sQuery.put(sIndex2, 1.0);
+      }
+      double TfOccurence = 0.0;
+      if (tfQuery.containsKey(sIndex2)) {
+        TfOccurence = tfQuery.get(sIndex2);
+      }
+      if (SOccurence == TfOccurence - 1) {
+        satisfied++;
+      }
+      index2++;
+      rindex2++;
+      if (t[rindex2].isEmpty()) {
+        rindex2++;
+        continue;
+      }
+ 
+      if (satisfied == needToSatisfy) {
+        double oldTfPreOccurence = 0.0;
+        if (tfQuery.containsKey(sIndex1)) {
+          oldTfPreOccurence = tfQuery.get(sIndex1);
+        }
+        double oldSPreOccurence = sQuery.get(sIndex1);
+        if (oldSPreOccurence > oldTfPreOccurence) {
+          if (oldSPreOccurence == 1) {
+            sQuery.remove(sIndex1);
+          } else {
+            sQuery.put(sIndex1, oldSPreOccurence - 1);
+          }
+          index1++;
+          rindex1++;
+          if (t[rindex1].isEmpty()) {
+            rindex1++;
+            continue;
+          }
+        }
+        if (index2 - index1 < smallestFieldWindow) {
+          smallestFieldWindow = index2 - index1;
+        }
+      }
+    }
+    return smallestFieldWindow;
+  }
+  
+  private int getSmallestFieldWindow(Map<String,Double> tfQuery, Map<String, List<Integer>> bodyHits) {
+    if (tfQuery == null) {
+      return Integer.MAX_VALUE;
+    }
+    
+    int needToSatisfy = tfQuery.size();
+    Map<String,Double> sQuery = new HashMap<String, Double>();
+    Map<Integer, String> t = new TreeMap<Integer, String>();
+    List<Integer> arrT = new ArrayList<Integer>();
+    for (String k : bodyHits.keySet()) {
+      for (Integer pos : bodyHits.get(k)) {
+        t.put(pos, k);
+        arrT.add(pos);
+      }
+    }
+    int sl = arrT.size();
+    int smallestFieldWindow = Integer.MAX_VALUE;
+    int satisfied = 0;
+    int index1 = 0;
+    int index2 = 0;
+    while(index2 < sl) {
+      Integer pos1 = arrT.get(index1);
+      String sIndex1 = t.get(pos1);
+      Integer pos2 = arrT.get(index2);
+      String sIndex2 = t.get(pos2);
+      double SOccurence = 0.0;
+      if (sQuery.containsKey(sIndex2)) {
+        SOccurence = sQuery.get(sIndex2);
+      }
+      sQuery.put(sIndex2, SOccurence + 1);
+      double TfOccurence = 0.0;
+      if (tfQuery.containsKey(sIndex2)) {
+        TfOccurence = tfQuery.get(sIndex2);
+      }
+      if (SOccurence == TfOccurence - 1) {
+        satisfied++;
+      }
+      index2++;
+      if (satisfied == needToSatisfy) {
+        double oldTfPreOccurence = 0.0;
+        if (tfQuery.containsKey(sIndex1)) {
+          oldTfPreOccurence = tfQuery.get(sIndex1);
+        }
+        double oldSPreOccurence = sQuery.get(sIndex1);
+        if (oldSPreOccurence > oldTfPreOccurence) {
+          if (oldSPreOccurence == 1) {
+            sQuery.remove(sIndex1);
+          } else {
+            sQuery.put(sIndex1, oldSPreOccurence - 1);
+          }
+          index1++;
+        }
+        if (pos2 - pos1 < smallestFieldWindow) {
+          smallestFieldWindow = pos2 - pos1;
+        }
+      }
+    }
+    return smallestFieldWindow;
+  }
+  
+  private int getSmallestFieldWindow(Map<String,Double> tfQuery, Document d, String tfType) {
+    int smallestFieldWindow = Integer.MAX_VALUE;
+    int tempSmallestFieldWindow = Integer.MAX_VALUE;
+    switch(tfType) {
+    case "url":
+      smallestFieldWindow = getSmallestFieldWindow(tfQuery, d.url, "[^A-Za-z0-9]+");
+      break;
+    case "title":
+      smallestFieldWindow = getSmallestFieldWindow(tfQuery, d.title, " ");
+      break;
+    case "body":
+      if (tfQuery.size() != d.body_hits.size()) {
+        return Integer.MAX_VALUE;
+      }
+      smallestFieldWindow = getSmallestFieldWindow(tfQuery, d.body_hits);
+      break;
+    case "header":
+      if (d.headers == null) {
+        return Integer.MAX_VALUE;
+      }
+      for (String header : d.headers) {
+        tempSmallestFieldWindow = getSmallestFieldWindow(tfQuery, header, " ");
+        if (tempSmallestFieldWindow < smallestFieldWindow) {
+          smallestFieldWindow = tempSmallestFieldWindow;
+        }
+      }
+      break;
+    case "anchor":
+      if (d.anchors == null) {
+        return Integer.MAX_VALUE;
+      }
+      for (String anchor : d.anchors.keySet()) {
+        tempSmallestFieldWindow = getSmallestFieldWindow(tfQuery, anchor, " ");
+        if (tempSmallestFieldWindow < smallestFieldWindow) {
+          smallestFieldWindow = tempSmallestFieldWindow;
+        }
+      }
+      break;
+    }
+    return smallestFieldWindow;
   }
 
   /**
@@ -22,11 +218,15 @@ public class SmallestWindowScorer extends BM25Scorer {
    * @param d: document
    * @param q: query
    */  
-  private int getWindow(Document d, Query q) {
-    /*
-     * @//TODO : Your code here
-     */
-    return -1;
+  private int getWindow(Document d, Query q, Map<String,Double> tfQuery) {
+    int smallestWindow = Integer.MAX_VALUE;
+    for (String tfType : this.TFTYPES) {
+      int smallestFieldWindow = getSmallestFieldWindow(tfQuery, d, tfType);
+      if (smallestFieldWindow < smallestWindow) {
+        smallestWindow = smallestFieldWindow;
+      }
+    }
+    return smallestWindow;
   }
 
   
@@ -35,14 +235,17 @@ public class SmallestWindowScorer extends BM25Scorer {
    * @param d: document
    * @param q: query
    */  
-  private double getBoostScore (Document d, Query q) {
-    int smallestWindow = getWindow(d, q);
-    double boostScore = 0;
-    /*
-     * @//TODO : Your code here, calculate the boost score.
-     *
-     */
-    return boostScore;
+  private double getBoostScore (Document d, Query q, Map<String,Double> tfQuery) {
+    int smallestWindow = getWindow(d, q, tfQuery);
+    double queryLength = 0;
+    for (String query : tfQuery.keySet()) {
+      queryLength = queryLength + tfQuery.get(query);
+    }
+    if (smallestWindow == Integer.MAX_VALUE) {
+      return 1;
+    }
+    double diff = smallestWindow - queryLength;
+    return 1 + (B - 1) * Math.exp(-diff);
   }
   
   @Override
@@ -50,7 +253,7 @@ public class SmallestWindowScorer extends BM25Scorer {
     Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d,q);
     this.normalizeTFs(tfs, d, q);
     Map<String,Double> tfQuery = getQueryFreqs(q);
-    double boost = getBoostScore(d, q);
+    double boost = getBoostScore(d, q, tfQuery);
     double rawScore = this.getNetScore(tfs, q, tfQuery, d);
     return boost * rawScore;
   }
