@@ -296,17 +296,17 @@ public class CosinNdcgMain {
   }
 
   private static List<Double> backgournFreeInitValue() {
-    Double[] arrays = {0.1,0.1,0.1,0.1,0.1};
+    Double[] arrays = {0.2,0.2,0.2,0.2,0.2};
     return new ArrayList<>(Arrays.asList(arrays));
   }
 
   private static List<Pair<String,Pair<Double,Double>>> backgroundFreeInitParams() {
     List<Pair<String,Pair<Double,Double>>>  parameters =  new ArrayList<>();
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[0],new Pair(-0.9,1.1)));// url
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[1],new Pair(-0.9,1.1)));// title
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[2],new Pair(-0.9,1.1)));// body
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[3],new Pair(-0.9,1.1)));// header
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[4],new Pair(-0.9,1.1)));// anchor
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[0],new Pair(0.0,1.0)));// url
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[1],new Pair(0.0,1.0)));// title
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[2],new Pair(0.0,1.0)));// body
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[3],new Pair(0.0,1.0)));// header
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[4],new Pair(0.0,1.0)));// anchor
     return parameters;
   }
 
@@ -337,7 +337,7 @@ public class CosinNdcgMain {
   public Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> linearConstrainTunner(List<Pair<String,Pair<Double,Double>>> parameters,
       List<Double> initialValues, Map<Query,Map<String, Document>> queryDict, String taskOption,
       Map<String, Double> idfs,CosinNdcgMain test, Map<String,Map<String,Double>> relevScores, List<Pair<Pair<Integer,Integer>, Double>> additionalConfig){
-    AdditionalConfigTunner tunner = new AdditionalConfigTunner(parameters,initialValues,2);
+    LinearContraintConfigTunner tunner = new LinearContraintConfigTunner(parameters,initialValues,2);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     double bestScore = -Double.MAX_VALUE;
     while(tunner.isFlippable()){

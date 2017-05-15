@@ -193,25 +193,25 @@ public class BM25NdcgMain {
   }
 
   private static List<Double> backgournFreeInitValue() {
-    Double[] arrays = {0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1};
+    Double[] arrays = {0.2,0.2,0.2,0.2,0.2,0.75,0.75,0.75,0.75,0.75,2.0,0.1,1.0};
     return new ArrayList<>(Arrays.asList(arrays));
   }
 
   private static List<Pair<String,Pair<Double,Double>>> backgroundFreeInitParams() {
     List<Pair<String,Pair<Double,Double>>>  parameters =  new ArrayList<>();
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[0],new Pair(-0.9,1.1)));// url
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[1],new Pair(-0.9,1.1)));// title
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[2],new Pair(-0.9,1.1)));// body
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[3],new Pair(-0.9,1.1)));// header
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[4],new Pair(-0.9,1.1)));// anchor
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[5],new Pair(-0.9,1.1)));// burl
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[6],new Pair(-0.9,1.1)));// btitle
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[7],new Pair(-0.9,1.1)));// bbody
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[8],new Pair(-0.9,1.1)));// bheader
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[9],new Pair(-0.9,1.1)));// banchor
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[10],new Pair(-0.9,1.1)));// k1
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[11],new Pair(-0.9,1.1)));// lambda
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[12],new Pair(-0.9,1.1)));// lambda prime
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[0],new Pair(0.0,1.0)));// url
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[1],new Pair(0.0,1.0)));// title
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[2],new Pair(0.0,1.0)));// body
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[3],new Pair(0.0,1.0)));// header
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[4],new Pair(0.0,1.0)));// anchor
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[5],new Pair(0.0,1.0)));// burl
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[6],new Pair(0.0,1.0)));// btitle
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[7],new Pair(0.0,1.0)));// bbody
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[8],new Pair(0.0,1.0)));// bheader
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[9],new Pair(0.0,1.0)));// banchor
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[10],new Pair(1.2,2.8)));// k1
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[11],new Pair(0.0,10.0)));// lambda
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[12],new Pair(1.0,1000.0)));// lambda prime
     return parameters;
   }
 
