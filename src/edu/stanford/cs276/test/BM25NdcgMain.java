@@ -258,7 +258,7 @@ public class BM25NdcgMain {
   }
 
   private static List<Double> backgournFreeInitValue() {
-    Double[] arrays = {0.2,0.2,0.2,0.2,0.2};
+    Double[] arrays = {0.2644014556629939,0.10510086984744799,0.0384065783028405,0.2422114619962158,0.3498796341905017};
     return new ArrayList<>(Arrays.asList(arrays));
   }
 
