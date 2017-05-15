@@ -4,6 +4,8 @@ time ./ndcg.sh output/output_rank.txt data/pa3.rel.dev output/ndcg_output_rank.t
 
 
 time java -Xmx6024m -cp classes edu.stanford.cs276.test.CosinNdcgMain data/pa3.signal.train cosine idfs false data/pa3.rel.train | tee  output/automatic_tunning.txt
+time java -Xmx6024m -cp classes edu.stanford.cs276.test.BM25NdcgMain data/pa3.signal.train cosine idfs false data/pa3.rel.train | tee  output/automatic_tunning.txt
+
 
 time java -Xmx6024m -cp classes edu.stanford.cs276.test.AdditionalConfigTunner
 
