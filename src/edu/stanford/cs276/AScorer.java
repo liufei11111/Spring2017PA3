@@ -107,20 +107,6 @@ public abstract class AScorer {
         tfQuery.put(str,1.0);
       }
     }
-    double logTotalDocumentCount = this.idfs.get(Config.totalDocumentCountKey);
-    for (Entry<String,Double> entry : tfQuery.entrySet()){
-      double sublinearTermFreq = Math.log(entry.getValue())+1;
-      if (!this.idfs.containsKey(entry.getKey())){
-        // cancel out the term freq when calculating idf and add laplace smoothed the term freq
-        double freshIdfs = Math.log(entry.getValue()+1);
-        double idfFresh = logTotalDocumentCount-freshIdfs;
-        entry.setValue(sublinearTermFreq*idfFresh);
-      }else{
-        // We are sublinear tf + log idf
-        // so that the terms in the corpus is better than not
-        entry.setValue(sublinearTermFreq*this.idfs.get(entry.getKey()));
-      }
-    }
     return tfQuery;
   }
   
