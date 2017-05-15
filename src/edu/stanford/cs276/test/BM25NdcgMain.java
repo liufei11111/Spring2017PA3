@@ -41,7 +41,8 @@ public class BM25NdcgMain {
    */
   private static Map<Query,List<Pair<Document,Double>>> score(
       Map<Query, Map<String, Document>> queryDict, String scoreType, Map<String, Double> idfs,
-      List<Pair<Pair<Integer, Integer>, Double>> config) {
+      List<Pair<Pair<Integer, Integer>, Double>> config,
+      List<Pair<Pair<Integer, Integer>, Double>> additionalConfig) {
     AScorer scorer = null;
     if (scoreType.equals("baseline")) {
       scorer = new BaselineScorer();
@@ -62,14 +63,14 @@ public class BM25NdcgMain {
       temp.bodyweight = config.get(2).getSecond();
       temp.headerweight = config.get(3).getSecond();
       temp.anchorweight = config.get(4).getSecond();
-      temp.burl = config.get(5).getSecond();
-      temp.btitle =config.get(6).getSecond();
-      temp.bheader = config.get(7).getSecond();
-      temp.bbody = config.get(8).getSecond();
-      temp.banchor = config.get(9).getSecond();
-      temp.k1 = config.get(10).getSecond();
-      temp.pageRankLambda = config.get(11).getSecond();
-      temp.pageRankLambdaPrime = config.get(12).getSecond();
+      temp.burl = additionalConfig.get(0).getSecond();
+      temp.btitle =additionalConfig.get(1).getSecond();
+      temp.bheader = additionalConfig.get(2).getSecond();
+      temp.bbody = additionalConfig.get(3).getSecond();
+      temp.banchor = additionalConfig.get(4).getSecond();
+      temp.k1 = additionalConfig.get(5).getSecond();
+      temp.pageRankLambda = additionalConfig.get(6).getSecond();
+      temp.pageRankLambdaPrime = additionalConfig.get(7).getSecond();
     } else if (scoreType.equals("window")) {
       // feel free to change this to match your cosine scorer if you choose to build on top of that instead
       scorer = new SmallestWindowScorer(idfs, queryDict);
@@ -158,7 +159,6 @@ public class BM25NdcgMain {
       System.err.println("Invalid scoring type; should be either 'baseline', 'bm25', 'cosine', 'window', or 'extra'");
       return;
     }
-
     /* start loading query pages to be ranked. */
     Map<Query,Map<String, Document>> queryDict = null;
     /* Populate map with features from file */
@@ -182,18 +182,83 @@ public class BM25NdcgMain {
     /////////////////////linear constraint init values///////////////
     List<Pair<String,Pair<Double,Double>>> parameters = backgroundFreeInitParams();
     List<Double> initialValues = backgournFreeInitValue();
+
+
+    ///////////////////// additional init values///////////////
+    List<Pair<String,Pair<Double,Double>>> additionalParams = polulateAdditionalInitParams();
+
+    List<Double> additionalInitialValues = polulateAdditionalInitValue();
+    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,2);
+    List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
+    String bestLinearConfig = null;
+    double bestScore = -Double.MAX_VALUE;
+    while(tunner.isFlippable()){
+      System.out.println("==================Generating Config:=====================");
+      while(!tunner.isCompleted()){
+        // i, which -> config value
+        List<Pair<Pair<Integer,Integer>, Double>> config = tunner.getConfig();
+        Pair<Pair<Integer,Integer>, Double> oneTuned = null;
+        for (Pair<Pair<Integer,Integer>, Double> pair : config){
+          if (pair.getFirst().getSecond() < tunner.eachSize && pair.getFirst().getSecond()>=0 ){
+            oneTuned = pair;
+          }
+        }
+        if (oneTuned == null){
+          oneTuned = config.get(config.size()-1);
+        }
+//        System.out.println("Picked pair: "+oneTuned);
+        System.out.println("---Generating Config:---");
+        tunner.printConfig(config);
+
+
+
     /* score documents for queries */
-        Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> localResult = test.linearConstrainTunner(parameters, initialValues, queryDict, taskOption, idfs, test, relevScores);
+        Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> localResult = test.linearConstrainTunner(parameters, initialValues, queryDict, taskOption, idfs, test, relevScores, config);
+        // update parameters and initial values for linear constraint problem
+        updateParameters(localResult, parameters);
+        updateInitValues(localResult, initialValues);
+        //
 
+        double ndcgScore = localResult.getSecond();
+        System.out.println("ConsinNDcgMain test run for NDCGScore: "+ndcgScore);
+        System.out.println("-------------------------");
+        tunner.update(oneTuned.getFirst().getFirst(),oneTuned.getFirst().getSecond(),ndcgScore);
+        if (ndcgScore>bestScore){
+          bestScore = ndcgScore;
+          bestConfig = config;
+          bestLinearConfig = LinearContraintConfigTunner.keepRunningConfigPrintOut;
+        }
+      }
+      tunner.flip();
+      parameters = backgroundFreeInitParams();
+      initialValues = backgournFreeInitValue();
+    }
     System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-    System.out.println("Best Score: "+localResult.getSecond());
-
+    tunner.printConfig(bestConfig);
+    System.out.println(bestLinearConfig);
+    System.out.println("Best Score: "+bestScore);
 
 
   }
+  private static List<Double> polulateAdditionalInitValue() {
+    Double[] arrays = {0.75,0.75,0.75,0.75,0.75,2.0,0.1,1.0};
+    return new ArrayList<>(Arrays.asList(arrays));
+  }
+  private static List<Pair<String,Pair<Double,Double>>> polulateAdditionalInitParams() {
+    List<Pair<String,Pair<Double,Double>>>  parameters =  new ArrayList<>();
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[5],new Pair(0.0,1.0)));// burl
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[6],new Pair(0.0,1.0)));// btitle
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[7],new Pair(0.0,1.0)));// bbody
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[8],new Pair(0.0,1.0)));// bheader
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[9],new Pair(0.0,1.0)));// banchor
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[10],new Pair(1.2,2.8)));// k1
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[11],new Pair(0.0,10.0)));// lambda
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[12],new Pair(1.0,1000.0)));// lambda prime
+    return parameters;
+  }
 
   private static List<Double> backgournFreeInitValue() {
-    Double[] arrays = {0.2,0.2,0.2,0.2,0.2,0.75,0.75,0.75,0.75,0.75,2.0,0.1,1.0};
+    Double[] arrays = {0.2,0.2,0.2,0.2,0.2};
     return new ArrayList<>(Arrays.asList(arrays));
   }
 
@@ -204,14 +269,7 @@ public class BM25NdcgMain {
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[2],new Pair(0.0,1.0)));// body
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[3],new Pair(0.0,1.0)));// header
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[4],new Pair(0.0,1.0)));// anchor
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[5],new Pair(0.0,1.0)));// burl
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[6],new Pair(0.0,1.0)));// btitle
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[7],new Pair(0.0,1.0)));// bbody
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[8],new Pair(0.0,1.0)));// bheader
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[9],new Pair(0.0,1.0)));// banchor
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[10],new Pair(1.2,2.8)));// k1
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[11],new Pair(0.0,10.0)));// lambda
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[12],new Pair(1.0,1000.0)));// lambda prime
+
     return parameters;
   }
 
@@ -241,7 +299,7 @@ public class BM25NdcgMain {
 
   public Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> linearConstrainTunner(List<Pair<String,Pair<Double,Double>>> parameters,
       List<Double> initialValues, Map<Query,Map<String, Document>> queryDict, String taskOption,
-      Map<String, Double> idfs,BM25NdcgMain test, Map<String,Map<String,Double>> relevScores){
+      Map<String, Double> idfs,BM25NdcgMain test, Map<String,Map<String,Double>> relevScores,  List<Pair<Pair<Integer, Integer>, Double>> additionalConfig){
     AdditionalConfigTunner tunner = new AdditionalConfigTunner(parameters,initialValues,5);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     double bestScore = -Double.MAX_VALUE;
@@ -263,7 +321,7 @@ public class BM25NdcgMain {
 //        System.out.println("---Generating Config:---");
         tunner.printConfig(config);
 
-        Map<Query,List<Pair<Document,Double>>> queryRankings = score(queryDict, taskOption, idfs, config);
+        Map<Query,List<Pair<Document,Double>>> queryRankings = score(queryDict, taskOption, idfs, config, additionalConfig);
         double ndcgScore = test.runOneConfigure(relevScores,queryRankings);
 //        System.out.println("ConsinNDcgMain test run for NDCGScore: "+ndcgScore);
 //        System.out.println("-------------------------");
