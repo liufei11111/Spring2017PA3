@@ -43,8 +43,8 @@ public class BM25Scorer extends AScorer {
   
   // query -> url -> document
   Map<Query,Map<String, Document>> queryDict; 
-  
-  Map<String, Document> urlDocs;
+
+  Set<Document> docs;
 
   // BM25 data structures--feel free to modify these
   // Document -> field -> length
@@ -75,11 +75,12 @@ public class BM25Scorer extends AScorer {
     lengths = new HashMap<Document,Map<String,Double>>();
     avgLengths = new HashMap<String,Double>();
     pagerankScores = new HashMap<Document,Double>();
-    urlDocs = new HashMap<String, Document>();
+    docs = new HashSet<Document>();
     for (Query query : queryDict.keySet()) {
       Map<String, Document> urls = queryDict.get(query);
       for (String url : urls.keySet()) {
-        urlDocs.put(url, urls.get(url));
+        Document doc = urls.get(url);
+        docs.add(doc);
       }
     }
     Bf = new HashMap<String, Double>();
@@ -94,40 +95,42 @@ public class BM25Scorer extends AScorer {
     Wf.put("body", bodyweight);
     Wf.put("header", headerweight);
     Wf.put("anchor", anchorweight);
-
-    for (String url : urlDocs.keySet()) {
-      Document doc = urlDocs.get(url);
-      pagerankScores.put(doc, getPageRankScores(doc.page_rank));
-      Map<String,Double> fieldLength = new HashMap<String, Double>();
-      for (String tfType : this.TFTYPES) {
-        double len = 0;
-        switch(tfType) {
-          case "url":
-            len = getUrlLength(doc.url);
-            break;
-          case "title":
-            len = getStringLength(doc.title);
-            break;
-          case "body":
-            len = doc.body_length;
-            break;
-          case "header":
-            len = getHeaderLength(doc.headers);
-            break;
-          case "anchor":
-            len = getAnchorLength(doc.anchors);
-            break;
-        }
-        fieldLength.put(tfType, len);
-      }
-      lengths.put(doc, fieldLength);
-    }
     
-    double docNum = urlDocs.size();
+    for (Query query : queryDict.keySet()) {
+      Map<String, Document> urls = queryDict.get(query);
+      for (String url : urls.keySet()) {
+        Document doc = urls.get(url);
+        pagerankScores.put(doc, getPageRankScores(doc.page_rank));
+        Map<String,Double> fieldLength = new HashMap<String, Double>();
+        for (String tfType : this.TFTYPES) {
+          double len = 0;
+          switch(tfType) {
+            case "url":
+              len = getUrlLength(doc.url);
+              break;
+            case "title":
+              len = getStringLength(doc.title);
+              break;
+            case "body":
+              len = doc.body_length;
+              break;
+            case "header":
+              len = getHeaderLength(doc.headers);
+              break;
+            case "anchor":
+              len = getAnchorLength(doc.anchors);
+              break;
+          }
+          fieldLength.put(tfType, len);
+        }
+        lengths.put(doc, fieldLength);
+      }
+    }
+
+    double docNum = docs.size();
     for (String tfType : this.TFTYPES) {
       double totalLen = 0;
-      for (String url : urlDocs.keySet()) {
-        Document doc = urlDocs.get(url);
+      for (Document doc : docs) {
         Map<String, Double> fieldLength = lengths.get(doc);
         totalLen = totalLen + fieldLength.get(tfType);
       }
