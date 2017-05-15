@@ -239,7 +239,7 @@ public class CosinNdcgMain {
 
     ///////////////////// additional init values///////////////
     List<Pair<String,Pair<Double,Double>>> additionalParams = new ArrayList<>();
-    additionalParams.add(new Pair("SmoothingBodyLength",new Pair(500,1350.0)));
+    additionalParams.add(new Pair("SmoothingBodyLength",new Pair(500.0,1350.0)));
     Double[] additionalArrays = {925.0};
     List<Double> additionalInitialValues = Arrays.asList(additionalArrays);
     AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,3);
