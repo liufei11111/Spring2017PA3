@@ -5,4 +5,5 @@ idfs
 output/*
 pa1-data/*
 ranked.txt
+bm25Para.txt
 *~
