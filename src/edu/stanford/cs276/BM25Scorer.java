@@ -286,9 +286,9 @@ public class BM25Scorer extends AScorer {
    * @return the similarity score
    */
   public double getSimScore(Document d, Query q) {
-    Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d,q);
+    Map<String,Map<String, Double>> tfs = this.getRawDocTermFreqs(d,q);
     this.normalizeTFs(tfs, d, q);
-    Map<String,Double> tfQuery = getQueryFreqs(q);
+    Map<String,Double> tfQuery = getRawQueryFreqs(q);
 
     // Write out the tuned BM25 parameters
     // This is only used for grading purposes.
