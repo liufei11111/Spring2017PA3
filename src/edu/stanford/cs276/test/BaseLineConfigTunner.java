@@ -17,7 +17,7 @@ public abstract class BaseLineConfigTunner {
   int flipLimit;
   int currIndex ;
 
-  public static String[] TFTYPES = {"url","title","body","header","anchor"};
+  public static String[] TFTYPES = {"url","title","body","header","anchor","burl","btitle","bbody","bheader","banchor","k1","pageRankLambda","pageRankLambdaPrime"};
   public BaseLineConfigTunner(List<Pair<String,Pair<Double,Double>>> parameters, List<Double> initialValues, int flipLimit){
     this.parameters = parameters;
     this.initialValues = initialValues;
