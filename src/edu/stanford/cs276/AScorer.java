@@ -72,6 +72,43 @@ public abstract class AScorer {
     }
     double logTotalDocumentCount = this.idfs.get(Config.totalDocumentCountKey);
     for (Entry<String,Double> entry : tfQuery.entrySet()){
+      double sublinearTermFreq = entry.getValue();// no sub linear scaling
+      if (!this.idfs.containsKey(entry.getKey())){
+        // cancel out the term freq when calculating idf and add laplace smoothed the term freq
+        double freshIdfs = Math.log(entry.getValue()+1);
+        double idfFresh = logTotalDocumentCount-freshIdfs;
+        entry.setValue(sublinearTermFreq*idfFresh);
+      }else{
+        // We are sublinear tf + log idf
+        // so that the terms in the corpus is better than not
+        entry.setValue(sublinearTermFreq*this.idfs.get(entry.getKey()));
+      }
+    }
+    return tfQuery;
+  }
+  public Map<String,Double> getRawQueryFreqs(Query q) {
+
+    // queryWord -> term frequency
+    Map<String,Double> tfQuery = new HashMap<String, Double>();
+
+    /*
+     * TODO : Your code here
+     * Compute the raw term (and/or sublinearly scaled) frequencies
+     * Additionally weight each of the terms using the idf value
+     * of the term in the query (we use the PA1 corpus to determine
+     * how many documents contain the query terms which is stored
+     * in this.idfs).
+     */
+    for (String str : q.queryWords){
+      str = str.toLowerCase();
+      if (tfQuery.containsKey(str)){
+        tfQuery.put(str,tfQuery.get(str)+1.0);
+      }else{
+        tfQuery.put(str,1.0);
+      }
+    }
+    double logTotalDocumentCount = this.idfs.get(Config.totalDocumentCountKey);
+    for (Entry<String,Double> entry : tfQuery.entrySet()){
       double sublinearTermFreq = Math.log(entry.getValue())+1;
       if (!this.idfs.containsKey(entry.getKey())){
         // cancel out the term freq when calculating idf and add laplace smoothed the term freq
@@ -86,7 +123,6 @@ public abstract class AScorer {
     }
     return tfQuery;
   }
-  
   
   /*
    * TODO : Your code here
@@ -115,7 +151,7 @@ public abstract class AScorer {
   public Map<String,Map<String, Double>> getDocTermFreqs(Document d, Query q) {
     // Map from tf type -> queryWord -> score
     Map<String,Map<String, Double>> tfs = emptyDcoTermFreqs();
-    
+
     /*
      * TODO : Your code here
      * Initialize any variables needed
@@ -144,7 +180,38 @@ public abstract class AScorer {
     }
     return tfs;
   }
+  public Map<String,Map<String, Double>> getRawDocTermFreqs(Document d, Query q) {
+    // Map from tf type -> queryWord -> score
+    Map<String,Map<String, Double>> tfs = emptyDcoTermFreqs();
 
+    /*
+     * TODO : Your code here
+     * Initialize any variables needed
+     */
+    //{"url","title","body","header","anchor"};
+    Map<String, Double> docUrlMap = genDocUrlMap(d.url);
+    Map<String, Double> docTitleMap = genDocTextMap(d.title);
+    Map<String, Double> docBodyMap = genDocBodyToMap(d.body_hits);
+    Map<String, Double> docHeaderMap = genDocListTextToMap(d.headers);
+    Map<String, Double> docAnchorMap = genDocMapTextToMap(d.anchors);
+
+    for (String queryWord : q.queryWords) {
+      queryWord = queryWord.toLowerCase();
+      /*
+       * Your code here
+       * Loop through query terms and accumulate term frequencies.
+       * Note: you should do this for each type of term frequencies,
+       * i.e. for each of the different fields.
+       * Don't forget to lowercase the query word.
+       */
+      populateOldScore(tfs, queryWord, docUrlMap, 0);
+      populateOldScore(tfs, queryWord, docTitleMap, 1);
+      populateOldScore(tfs, queryWord, docBodyMap, 2);
+      populateOldScore(tfs, queryWord, docHeaderMap, 3);
+      populateOldScore(tfs, queryWord, docAnchorMap, 4);
+    }
+    return tfs;
+  }
   private void populateNewScore(Map<String,Map<String, Double>> tfs, String queryWord, Map<String, Double> truthMap, int fieldIndex){
     if (truthMap.containsKey(queryWord)){
       double subLinearScore = Math.log(truthMap.get(queryWord))+1;
@@ -154,7 +221,13 @@ public abstract class AScorer {
     }
   }
 
-
+  private void populateOldScore(Map<String,Map<String, Double>> tfs, String queryWord, Map<String, Double> truthMap, int fieldIndex){
+    if (truthMap.containsKey(queryWord)){
+      tfs.get(TFTYPES[fieldIndex]).put(queryWord,truthMap.get(queryWord));
+    }else{
+      tfs.get(TFTYPES[fieldIndex]).put(queryWord,0.0);
+    }
+  }
   private Map<String,Double> genDocBodyToMap(Map<String, List<Integer>> body_hits) {
     Map<String,Double> body = new HashMap<>();
     if (body_hits == null){return body;}
