@@ -20,7 +20,6 @@ import java.util.Comparator;
 
 import edu.stanford.cs276.util.Pair;
 import java.util.Map.Entry;
-import javax.print.Doc;
 
 /**
  * The entry class for this programming assignment.
@@ -234,22 +233,16 @@ public class CosinNdcgMain {
 //    String outputFilePath = "ranked.txt";
 //    writeRankedResultsToFile(queryRankings,outputFilePath);
     /////////////////////linear constraint init values///////////////
-    List<Pair<String,Pair<Double,Double>>> parameters = new ArrayList<>();
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[0],new Pair(-0.9,1.1)));// url
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[1],new Pair(-0.9,1.1)));// title
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[2],new Pair(-0.9,1.1)));// body
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[3],new Pair(-0.9,1.1)));// header
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[4],new Pair(-0.9,1.1)));// anchor
-    Double[] arrays = {0.1,0.1,0.1,0.1,0.1};
-    List<Double> initialValues = new ArrayList<>(Arrays.asList(arrays));
+    List<Pair<String,Pair<Double,Double>>> parameters = backgroundFreeInitParams();
+    List<Double> initialValues = backgournFreeInitValue();
 
 
     ///////////////////// additional init values///////////////
     List<Pair<String,Pair<Double,Double>>> additionalParams = new ArrayList<>();
-    additionalParams.add(new Pair("SmoothingBodyLength",new Pair(0.0,1000.0)));
-    Double[] additionalArrays = {500.0};
+    additionalParams.add(new Pair("SmoothingBodyLength",new Pair(500,1350.0)));
+    Double[] additionalArrays = {925.0};
     List<Double> additionalInitialValues = Arrays.asList(additionalArrays);
-    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,2);
+    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,3);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     List<Pair<Pair<Integer,Integer>, Double>> bestLocalConfig = null;
     double bestScore = -Double.MAX_VALUE;
@@ -291,6 +284,8 @@ public class CosinNdcgMain {
         }
       }
       tunner.flip();
+      parameters = backgroundFreeInitParams();
+      initialValues = backgournFreeInitValue();
     }
     System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$");
     tunner.printConfig(bestConfig);
@@ -299,6 +294,21 @@ public class CosinNdcgMain {
 
 
 
+  }
+
+  private static List<Double> backgournFreeInitValue() {
+    Double[] arrays = {0.1,0.1,0.1,0.1,0.1};
+    return new ArrayList<>(Arrays.asList(arrays));
+  }
+
+  private static List<Pair<String,Pair<Double,Double>>> backgroundFreeInitParams() {
+    List<Pair<String,Pair<Double,Double>>>  parameters =  new ArrayList<>();
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[0],new Pair(-0.9,1.1)));// url
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[1],new Pair(-0.9,1.1)));// title
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[2],new Pair(-0.9,1.1)));// body
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[3],new Pair(-0.9,1.1)));// header
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[4],new Pair(-0.9,1.1)));// anchor
+    return parameters;
   }
 
   private static void updateInitValues(
