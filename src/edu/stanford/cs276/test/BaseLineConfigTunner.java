@@ -13,7 +13,7 @@ public abstract class BaseLineConfigTunner {
   List<Integer> progress;
   List<Double> initialValues;
   List<Pair<Integer,Double>> bestTracker;// for current round which config and what score
-  int eachSize = 10;
+  double eachSize = 10.0;
   int flipLimit;
   int currIndex ;
 
@@ -50,7 +50,7 @@ public abstract class BaseLineConfigTunner {
       return initialValues.get(i);
     }else{
       Pair<String,Pair<Double,Double>> config =  parameters.get(i);
-      double diff = (config.getSecond().getSecond() - config.getSecond().getFirst())/eachSize;
+      double diff = (config.getSecond().getSecond() - config.getSecond().getFirst())*1.0/eachSize;
       double nextParam = config.getSecond().getFirst()+diff*(which+1.0);
       return nextParam;
     }

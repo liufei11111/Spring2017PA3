@@ -244,7 +244,7 @@ public class CosinNdcgMain {
     List<Double> additionalInitialValues = Arrays.asList(additionalArrays);
     AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,3);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
-    List<Pair<Pair<Integer,Integer>, Double>> bestLocalConfig = null;
+
     double bestScore = -Double.MAX_VALUE;
     while(tunner.isFlippable()){
       System.out.println("==================Generating Config:=====================");
@@ -280,7 +280,6 @@ public class CosinNdcgMain {
         if (ndcgScore>bestScore){
           bestScore = ndcgScore;
           bestConfig = config;
-          bestLocalConfig = localResult.getFirst();
         }
       }
       tunner.flip();
