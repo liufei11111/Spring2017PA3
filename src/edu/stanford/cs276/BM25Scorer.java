@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 
+import java.util.Map.Entry;
+
 /**
  * Skeleton code for the implementation of a BM25 Scorer in Task 2.
  */
@@ -197,7 +199,7 @@ public class BM25Scorer extends AScorer {
    * @return the net score
    */
   public double getNetScore(Map<String,Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery,Document d) {
-
+    double logTotalDocumentCount = idfs.get(Config.totalDocumentCountKey);
     double score = 0.0;
     for (String term : tfQuery.keySet()) {
       double termScore = 0.0;
@@ -209,8 +211,11 @@ public class BM25Scorer extends AScorer {
         }
         termScore = termScore + freq * Wf.get(tfType);
       }
-      double idfsTerm = 10.0;
-      if (idfs.containsKey(term)) {
+      double idfsTerm = 0.0;
+      if (!idfs.containsKey(term)) {
+        double freshIdfs = Math.log(tfQuery.get(term)+1);
+        idfsTerm = logTotalDocumentCount-freshIdfs;
+      } else {
         idfsTerm = idfs.get(term);
       }
       score = score + (termScore / (k1 + termScore) * idfsTerm) * tfQuery.get(term);
@@ -288,6 +293,5 @@ public class BM25Scorer extends AScorer {
     // You should NOT modify the writeParaValues method.
     writeParaValues("bm25Para.txt");
     return getNetScore(tfs,q,tfQuery,d);
-  }
-  
+  } 
 }
