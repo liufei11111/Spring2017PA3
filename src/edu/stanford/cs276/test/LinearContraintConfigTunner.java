@@ -10,6 +10,8 @@ import java.util.List;
  */
 public class LinearContraintConfigTunner extends  BaseLineConfigTunner {
 
+  public static String keepRunningConfigPrintOut;
+
   public LinearContraintConfigTunner(
       List<Pair<String, Pair<Double, Double>>> parameters,
       List<Double> initialValues, int flipLimit) {

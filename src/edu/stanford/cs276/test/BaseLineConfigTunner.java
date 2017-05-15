@@ -91,6 +91,9 @@ public abstract class BaseLineConfigTunner {
       Pair<Pair<Integer,Integer>,Double> pair = config.get(i);
       sb.append(parameters.get(i).getFirst()+"_"+pair.getFirst().getSecond()+": "+pair.getSecond()+"\n");
     }
+    if (this instanceof LinearContraintConfigTunner){
+      LinearContraintConfigTunner.keepRunningConfigPrintOut = sb.toString();
+    }
     System.out.println(sb.toString());
   }
 }
