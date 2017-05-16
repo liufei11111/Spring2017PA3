@@ -139,7 +139,8 @@ public class BM25Scorer extends AScorer {
   }
   
   double getPageRankScores(int pageRank) {
-    return Math.log(pageRankLambdaPrime + pageRank);
+    return (double)pageRank / (pageRankLambdaPrime + pageRank);
+    //return Math.log(pageRankLambdaPrime + pageRank);
   }
   
   double getUrlLength(String s) {
