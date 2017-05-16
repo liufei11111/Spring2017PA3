@@ -188,7 +188,7 @@ public class BM25NdcgMain {
     List<Pair<String,Pair<Double,Double>>> additionalParams = polulateAdditionalInitParams();
 
     List<Double> additionalInitialValues = polulateAdditionalInitValue();
-    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,1);
+    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,3);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     String bestLinearConfig = null;
     double bestScore = -Double.MAX_VALUE;
@@ -241,7 +241,7 @@ public class BM25NdcgMain {
 
   }
   private static List<Double> polulateAdditionalInitValue() {
-    Double[] arrays = {0.75,0.75,0.75,0.75,0.75,2.0,0.1,1.0};
+    Double[] arrays = {0.75,0.75,0.75,0.75,0.75,2.0,0.1,100.0};
     return new ArrayList<>(Arrays.asList(arrays));
   }
   private static List<Pair<String,Pair<Double,Double>>> polulateAdditionalInitParams() {
@@ -253,7 +253,7 @@ public class BM25NdcgMain {
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[9],new Pair(0.0,1.0)));// banchor
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[10],new Pair(1.2,2.8)));// k1
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[11],new Pair(0.0,10.0)));// lambda
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[12],new Pair(1.0,1000.0)));// lambda prime
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[12],new Pair(100.0,1000.0)));// lambda prime
     return parameters;
   }
 
@@ -303,36 +303,41 @@ public class BM25NdcgMain {
     LinearContraintConfigTunner tunner = new LinearContraintConfigTunner(parameters,initialValues,1);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     double bestScore = -Double.MAX_VALUE;
-    while(tunner.isFlippable()){
-//      System.out.println("==================Generating Config:=====================");
-      while(!tunner.isCompleted()){
-        // i, which -> config value
-        List<Pair<Pair<Integer,Integer>, Double>> config = tunner.getConfig();
-        Pair<Pair<Integer,Integer>, Double> oneTuned = null;
-        for (Pair<Pair<Integer,Integer>, Double> pair : config){
-          if (pair.getFirst().getSecond() < tunner.eachSize && pair.getFirst().getSecond()>=0 ){
-            oneTuned = pair;
-          }
+//    while(tunner.isFlippable()){
+////      System.out.println("==================Generating Config:=====================");
+//      while(!tunner.isCompleted()){
+//        // i, which -> config value
+//        List<Pair<Pair<Integer,Integer>, Double>> config = tunner.getConfig();
+//        Pair<Pair<Integer,Integer>, Double> oneTuned = null;
+//        for (Pair<Pair<Integer,Integer>, Double> pair : config){
+//          if (pair.getFirst().getSecond() < tunner.eachSize && pair.getFirst().getSecond()>=0 ){
+//            oneTuned = pair;
+//          }
+//        }
+//        if (oneTuned == null){
+//          oneTuned = config.get(config.size()-1);
+//        }
+////        System.out.println("Picked pair: "+oneTuned);
+////        System.out.println("---Generating Config:---");
+//        tunner.printConfig(config);
+    //TODO temp test
+        List<Pair<Pair<Integer, Integer>, Double>> config = new ArrayList<>();
+        for (int i = 0;i<initialValues.size();++i){
+          double val = initialValues.get(i);
+          config.add(new Pair(new Pair(i,1),val));
         }
-        if (oneTuned == null){
-          oneTuned = config.get(config.size()-1);
-        }
-//        System.out.println("Picked pair: "+oneTuned);
-//        System.out.println("---Generating Config:---");
-        tunner.printConfig(config);
-
         Map<Query,List<Pair<Document,Double>>> queryRankings = score(queryDict, taskOption, idfs, config, additionalConfig);
         double ndcgScore = test.runOneConfigure(relevScores,queryRankings);
-//        System.out.println("ConsinNDcgMain test run for NDCGScore: "+ndcgScore);
-//        System.out.println("-------------------------");
-        tunner.update(oneTuned.getFirst().getFirst(),oneTuned.getFirst().getSecond(),ndcgScore);
+////        System.out.println("ConsinNDcgMain test run for NDCGScore: "+ndcgScore);
+////        System.out.println("-------------------------");
+//        tunner.update(oneTuned.getFirst().getFirst(),oneTuned.getFirst().getSecond(),ndcgScore);
         if (ndcgScore>bestScore){
           bestScore = ndcgScore;
           bestConfig = config;
         }
-      }
-      tunner.flip();
-    }
+//      }
+//      tunner.flip();
+//    }
 //    System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$");
     tunner.printConfig(bestConfig);
 //    System.out.println("Best Score: "+bestScore);
