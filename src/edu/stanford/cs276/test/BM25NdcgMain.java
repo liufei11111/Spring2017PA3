@@ -188,7 +188,7 @@ public class BM25NdcgMain {
     List<Pair<String,Pair<Double,Double>>> additionalParams = polulateAdditionalInitParams();
 
     List<Double> additionalInitialValues = polulateAdditionalInitValue();
-    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,2);
+    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,1);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     String bestLinearConfig = null;
     double bestScore = -Double.MAX_VALUE;
@@ -215,8 +215,8 @@ public class BM25NdcgMain {
     /* score documents for queries */
         Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> localResult = test.linearConstrainTunner(parameters, initialValues, queryDict, taskOption, idfs, test, relevScores, config);
         // update parameters and initial values for linear constraint problem
-        updateParameters(localResult, parameters);
-        updateInitValues(localResult, initialValues);
+//        updateParameters(localResult, parameters);
+//        updateInitValues(localResult, initialValues);
         //
 
         double ndcgScore = localResult.getSecond();
@@ -300,7 +300,7 @@ public class BM25NdcgMain {
   public Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> linearConstrainTunner(List<Pair<String,Pair<Double,Double>>> parameters,
       List<Double> initialValues, Map<Query,Map<String, Document>> queryDict, String taskOption,
       Map<String, Double> idfs,BM25NdcgMain test, Map<String,Map<String,Double>> relevScores,  List<Pair<Pair<Integer, Integer>, Double>> additionalConfig){
-    LinearContraintConfigTunner tunner = new LinearContraintConfigTunner(parameters,initialValues,2);
+    LinearContraintConfigTunner tunner = new LinearContraintConfigTunner(parameters,initialValues,1);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     double bestScore = -Double.MAX_VALUE;
     while(tunner.isFlippable()){
