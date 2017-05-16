@@ -28,11 +28,11 @@ public class CosineSimilarityScorer extends AScorer {
    * TODO: You will want to tune the values for
    * the weights for each field.
    */
-  public double urlweight = 0.1;
-  public double titleweight  = 0.1;
-  public double bodyweight = 0.1;
-  public double headerweight = 0.1;
-  public double anchorweight = 0.1;
+  public double urlweight = 0.1829549696199494;
+  public double titleweight  = 0.17680956230174338;
+  public double bodyweight = 0.06910484320731342;
+  public double headerweight = 0.10187301876210143;
+  public double anchorweight = 0.46925760610889244;
   public double smoothingBodyLength = 500.0;
   //  String[] TFTYPES = {"url","title","body","header","anchor"};
   /**
