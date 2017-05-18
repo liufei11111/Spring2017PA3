@@ -63,14 +63,14 @@ public class BM25NdcgMain {
       temp.bodyweight = config.get(2).getSecond();
       temp.headerweight = config.get(3).getSecond();
       temp.anchorweight = config.get(4).getSecond();
-      temp.burl = additionalConfig.get(0).getSecond();
-      temp.btitle =additionalConfig.get(1).getSecond();
-      temp.bheader = additionalConfig.get(2).getSecond();
-      temp.bbody = additionalConfig.get(3).getSecond();
-      temp.banchor = additionalConfig.get(4).getSecond();
-      temp.k1 = additionalConfig.get(5).getSecond();
-      temp.pageRankLambda = additionalConfig.get(6).getSecond();
-      temp.pageRankLambdaPrime = additionalConfig.get(7).getSecond();
+//      temp.burl = additionalConfig.get(0).getSecond();
+//      temp.btitle =additionalConfig.get(1).getSecond();
+//      temp.bheader = additionalConfig.get(2).getSecond();
+//      temp.bbody = additionalConfig.get(3).getSecond();
+//      temp.banchor = additionalConfig.get(4).getSecond();
+      temp.k1 = additionalConfig.get(0).getSecond();
+      temp.pageRankLambda = additionalConfig.get(1).getSecond();
+      temp.pageRankLambdaPrime = additionalConfig.get(2).getSecond();
     } else if (scoreType.equals("window")) {
       // feel free to change this to match your cosine scorer if you choose to build on top of that instead
       scorer = new SmallestWindowScorer(idfs, queryDict);
@@ -241,27 +241,34 @@ public class BM25NdcgMain {
 
   }
   private static List<Double> polulateAdditionalInitValue() {
-    Double[] arrays = {0.75,0.75,0.75,0.75,0.75,2.0,0.1,100.0};
+    Double[] arrays = {2.48, 0.3,190.0};
     return new ArrayList<>(Arrays.asList(arrays));
   }
   private static List<Pair<String,Pair<Double,Double>>> polulateAdditionalInitParams() {
     List<Pair<String,Pair<Double,Double>>>  parameters =  new ArrayList<>();
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[5],new Pair(0.0,1.0)));// burl
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[6],new Pair(0.0,1.0)));// btitle
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[7],new Pair(0.0,1.0)));// bbody
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[8],new Pair(0.0,1.0)));// bheader
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[9],new Pair(0.0,1.0)));// banchor
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[10],new Pair(1.2,2.8)));// k1
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[11],new Pair(0.0,10.0)));// lambda
-    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[12],new Pair(100.0,1000.0)));// lambda prime
+//    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[5],new Pair(0.0,1.0)));// burl
+//    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[6],new Pair(0.0,1.0)));// btitle
+//    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[7],new Pair(0.0,1.0)));// bbody
+//    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[8],new Pair(0.0,1.0)));// bheader
+//    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[9],new Pair(0.0,1.0)));// banchor
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[10],new Pair(2.8,2.8)));// k1
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[11],new Pair(0.05,0.55)));// lambda
+    parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[12],new Pair(100.0, 415.0)));// lambda prime
     return parameters;
   }
 
   private static List<Double> backgournFreeInitValue() {
-    Double[] arrays = {0.2644014556629939,0.10510086984744799,0.0384065783028405,0.2422114619962158,0.3498796341905017};
+    Double[] arrays = {0.30283269758076364,0.267759776196897,0.049405386247472524,0.2495416320848651,0.13046050789000171};
     return new ArrayList<>(Arrays.asList(arrays));
   }
-
+/**
+ *   public double urlweight = 0.30283269758076364;
+ public double titleweight  = 0.267759776196897;
+ public double bodyweight = 0.049405386247472524;
+ public double headerweight = 0.2495416320848651;
+ public double anchorweight = 0.13046050789000171;
+ public double smoothingBodyLength = 1350.0;
+ * **/
   private static List<Pair<String,Pair<Double,Double>>> backgroundFreeInitParams() {
     List<Pair<String,Pair<Double,Double>>>  parameters =  new ArrayList<>();
     parameters.add(new Pair(BaseLineConfigTunner.TFTYPES[0],new Pair(0.0,1.0)));// url

@@ -239,10 +239,10 @@ public class CosinNdcgMain {
 
     ///////////////////// additional init values///////////////
     List<Pair<String,Pair<Double,Double>>> additionalParams = new ArrayList<>();
-    additionalParams.add(new Pair("SmoothingBodyLength",new Pair(500.0,1350.0)));
-    Double[] additionalArrays = {925.0};
+    additionalParams.add(new Pair("SmoothingBodyLength",new Pair(100.0,1350.0)));
+    Double[] additionalArrays = {725.0};
     List<Double> additionalInitialValues = Arrays.asList(additionalArrays);
-    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,3);
+    AdditionalConfigTunner tunner = new AdditionalConfigTunner(additionalParams,additionalInitialValues,1);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     String bestLinearConfig = null;
     double bestScore = -Double.MAX_VALUE;
@@ -297,7 +297,7 @@ public class CosinNdcgMain {
   }
 
   private static List<Double> backgournFreeInitValue() {
-    Double[] arrays = {0.2,0.2,0.2,0.2,0.2};
+    Double[] arrays = {0.1,0.1,0.1,0.1,0.1};
     return new ArrayList<>(Arrays.asList(arrays));
   }
 
@@ -338,7 +338,7 @@ public class CosinNdcgMain {
   public Pair<List<Pair<Pair<Integer,Integer>, Double>>,Double> linearConstrainTunner(List<Pair<String,Pair<Double,Double>>> parameters,
       List<Double> initialValues, Map<Query,Map<String, Document>> queryDict, String taskOption,
       Map<String, Double> idfs,CosinNdcgMain test, Map<String,Map<String,Double>> relevScores, List<Pair<Pair<Integer,Integer>, Double>> additionalConfig){
-    LinearContraintConfigTunner tunner = new LinearContraintConfigTunner(parameters,initialValues,2);
+    LinearContraintConfigTunner tunner = new LinearContraintConfigTunner(parameters,initialValues,3);
     List<Pair<Pair<Integer,Integer>, Double>> bestConfig = null;
     double bestScore = -Double.MAX_VALUE;
     while(tunner.isFlippable()){
