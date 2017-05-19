@@ -16,8 +16,9 @@ import java.util.TreeMap;
  */
 public class SmallestWindowScorer extends BM25Scorer {
   
-  private double B = 2.0;
-  
+//  public double B = 2.0;
+  private double B = 1.001;
+//  public double B = 1.554;
   public SmallestWindowScorer(Map<String, Double> idfs, Map<Query,Map<String, Document>> queryDict) {
     super(idfs, queryDict);
     /*smallestWindow = new HashMap<Query, Map<Document, Double>>();

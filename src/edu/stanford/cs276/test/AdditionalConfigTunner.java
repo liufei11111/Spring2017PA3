@@ -14,7 +14,7 @@ public class AdditionalConfigTunner extends BaseLineConfigTunner{
       List<Pair<String, Pair<Double, Double>>> parameters,
       List<Double> initialValues, int flipLimit) {
     super(parameters, initialValues, flipLimit);
-//    eachSize = 5;
+    eachSize = 1000;
   }
 
   public List<Pair<Pair<Integer,Integer>, Double>> getConfig(){

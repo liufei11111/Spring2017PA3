@@ -297,7 +297,7 @@ public class CosinNdcgMain {
   }
 
   private static List<Double> backgournFreeInitValue() {
-    Double[] arrays = {0.1,0.1,0.1,0.1,0.1};
+    Double[] arrays = {0.2,0.2,0.2,0.2,0.2};
     return new ArrayList<>(Arrays.asList(arrays));
   }
 

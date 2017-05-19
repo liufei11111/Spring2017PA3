@@ -98,6 +98,7 @@ public class LinearContraintConfigTunner extends  BaseLineConfigTunner {
 //        System.out.println("Picked pair: "+oneTuned);
         System.out.println("---Generating Config:");
         tunner.printConfig(config);
+        //replace with arbitrary update to record decide what to do next
         tunner.update(oneTuned.getFirst().getFirst(),oneTuned.getFirst().getSecond(),-Math.pow(oneTuned.getFirst().getSecond()-0,2));
       }
       tunner.flip();

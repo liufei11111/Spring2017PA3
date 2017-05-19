@@ -6,9 +6,20 @@ time ./ndcg.sh output/output_rank.txt data/pa3.rel.dev output/ndcg_output_rank.t
 time java -Xmx6024m -cp classes edu.stanford.cs276.test.CosinNdcgMain data/pa3.signal.train cosine idfs false data/pa3.rel.train | tee  output/automatic_tunning.txt
 time java -Xmx6024m -cp classes edu.stanford.cs276.test.BM25NdcgMain data/pa3.signal.train bm25 idfs false data/pa3.rel.train | tee  output/automatic_tunning.txt
 
+time java -Xmx6024m -cp classes edu.stanford.cs276.test.WindowNdcgMain data/pa3.signal.train window idfs false data/pa3.rel.train | tee  output/automatic_tunning.txt
 
 time java -Xmx6024m -cp classes edu.stanford.cs276.test.AdditionalConfigTunner
 
 
 git@github.com:liufei11111/Spring2017PA3.git
 http://web.stanford.edu/class/cs276/pa/pa3-data.zip
+
+
+
+time ./rank.sh data/pa3.signal.dev window idfs false > output/output_rank.txt
+time ./ndcg.sh output/output_rank.txt data/pa3.rel.dev output/ndcg_output_rank.txt
+
+
+
+time ./rank.sh data/pa3.signal.train window idfs false > output/output_rank.txt
+time ./ndcg.sh output/output_rank.txt data/pa3.rel.train output/ndcg_output_rank.txt
