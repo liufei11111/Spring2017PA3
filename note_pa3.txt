@@ -20,6 +20,13 @@ time ./rank.sh data/pa3.signal.dev window idfs false > output/output_rank.txt
 time ./ndcg.sh output/output_rank.txt data/pa3.rel.dev output/ndcg_output_rank.txt
 
 
+time ./rank.sh data/pa3.signal.train bm25 idfs false > output/output_rank.txt
+time ./ndcg.sh output/output_rank.txt data/pa3.rel.train output/ndcg_output_rank.txt
+
 
 time ./rank.sh data/pa3.signal.train window idfs false > output/output_rank.txt
 time ./ndcg.sh output/output_rank.txt data/pa3.rel.train output/ndcg_output_rank.txt
+
+
+time ./rank.sh data/pa3.signal.dev window idfs false > output/output_rank.txt
+time ./ndcg.sh output/output_rank.txt data/pa3.rel.dev output/ndcg_output_rank.txt

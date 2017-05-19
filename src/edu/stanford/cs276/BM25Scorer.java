@@ -20,17 +20,12 @@ public class BM25Scorer extends AScorer {
   /*
    *  TODO: You will want to tune these values
    */
-//  public double urlweight = 0.30283269758076364;
-//  public double titleweight  = 0.267759776196897;
-//  public double bodyweight = 0.049405386247472524;
-//  public double headerweight = 0.2495416320848651;
-//  public double anchorweight = 0.13046050789000171;
   public double urlweight = 0.23795549267542235;
   public double titleweight  = 0.09096936314246667;
   public double bodyweight = 0.018406977715679264;
   public double headerweight = 0.25588594518954305;
   public double anchorweight = 0.39678222127688867;
-//  public double smoothingBodyLength = 1350.0;
+
   Map<String, Double> Wf;
 
   // BM25-specific weights

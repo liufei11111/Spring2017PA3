@@ -9,16 +9,12 @@ import java.util.List;
  */
 public class Query {
   public List<String> queryWords;
-  public String queryString;
   /**
    * Constructs a query.
    * @param query the query String.
    */
   public Query(String query) {
     queryWords = new ArrayList<String>(Arrays.asList(query.split(" ")));
-    if (Config.isDebug){
-      queryString = query;
-    }
   }
 
   /**
