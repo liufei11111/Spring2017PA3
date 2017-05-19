@@ -15,23 +15,10 @@ import java.util.TreeMap;
  * Also, feel free to modify or add helpers inside this class.
  */
 public class SmallestWindowScorer extends BM25Scorer {
-  
-//  public double B = 2.0;
-//  private double B = 1.001;
+
   public double B = 1.554;
   public SmallestWindowScorer(Map<String, Double> idfs, Map<Query,Map<String, Document>> queryDict) {
     super(idfs, queryDict);
-    /*smallestWindow = new HashMap<Query, Map<Document, Double>>();
-    for (Query query : queryDict.keySet()) {
-      
-      Map<String, Document> urls = queryDict.get(query);
-      for (String url : urls.keySet()) {
-        Document doc = urls.get(url);
-        for (String tfType : this.TFTYPES) {
-          int getSmallestFieldWindow()
-        }
-      }
-    }*/
   }
   
   private int getSmallestFieldWindow(Map<String,Double> tfQuery, String s, String reg) {
@@ -39,11 +26,6 @@ public class SmallestWindowScorer extends BM25Scorer {
     if (s.equals("http://www-cs.stanford.edu/pub/mirrors/ubuntu/ubuntu/dists/xenial/universe/i18n/Translation-sl")) {
       ss = 0;
     }
-    /*tfQuery.clear();
-    tfQuery.put("a", 1.0);
-    tfQuery.put("b", 2.0);
-    s = " a b a b b a  b a";
-    reg = " ";*/
     if (s == null || s.isEmpty()) {
       return Integer.MAX_VALUE;
     }
